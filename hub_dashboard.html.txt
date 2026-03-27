@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hub Control Dashboard</title>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 50px; background: #f0f0f0; }
+    .device { margin: 20px; padding: 20px; border-radius: 10px; display: inline-block; width: 150px; background: #fff; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+    .device h2 { margin-bottom: 10px; }
+    .status { font-weight: bold; margin-bottom: 10px; }
+    button { padding: 10px 20px; font-size: 16px; }
+  </style>
+</head>
+<body>
+
+<h1>Hub Control Dashboard</h1>
+
+<div class="device">
+  <h2>Light</h2>
+  <div class="status" id="lightStatus">OFF</div>
+  <button onclick="toggleDevice('light')">Toggle</button>
+</div>
+
+<div class="device">
+  <h2>Fan</h2>
+  <div class="status" id="fanStatus">OFF</div>
+  <button onclick="toggleDevice('fan')">Toggle</button>
+</div>
+
+<div class="device">
+  <h2>Lock</h2>
+  <div class="status" id="lockStatus">OFF</div>
+  <button onclick="toggleDevice('lock')">Toggle</button>
+</div>
+
+<div class="device">
+  <h2>Alarm</h2>
+  <div class="status" id="alarmStatus">OFF</div>
+  <button onclick="toggleDevice('alarm')">Toggle</button>
+</div>
+
+<script>
+  // ===== FIREBASE CONFIG =====
+  const firebaseConfig = {
+    apiKey: "AIzaSyBn-EqDz2hqYn6gchSHYljjJLzCEaEED2Y",
+    authDomain: "hub-control-logic.firebaseapp.com",
+    databaseURL: "https://hub-control-logic-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "hub-control-logic",
+    storageBucket: "hub-control-logic.firebasestorage.app",
+    messagingSenderId: "459438098600",
+    appId: "1:459438098600:web:f02519b5fc3d2d3390da9d",
+    measurementId: "G-P5S7F6FREJ"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.database();
+
+  // ===== LISTEN TO REAL-TIME UPDATES =====
+  const devices = ['light','fan','lock','alarm'];
+  devices.forEach(dev => {
+    db.ref('hub/' + dev).on('value', snapshot => {
+      const value = snapshot.val();
+      document.getElementById(dev + 'Status').innerText = value === 1 ? 'ON' : 'OFF';
+      document.getElementById(dev + 'Status').style.color = value === 1 ? 'green' : 'red';
+    });
+  });
+
+  // ===== TOGGLE FUNCTION =====
+  function toggleDevice(device) {
+    const ref = db.ref('hub/' + device);
+    ref.get().then(snapshot => {
+      let value = snapshot.val();
+      if (value === null) value = 0;
+      ref.set(value === 1 ? 0 : 1);
+    });
+  }
+</script>
+
+</body>
+</html>
